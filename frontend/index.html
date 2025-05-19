@@ -3,11 +3,105 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="./public/img/Collectify_Logo_Simple.svg" />
+    <link rel="stylesheet" href="./public/css/style.css"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Collectify</title>
+    <script type="module" src="https://unpkg.com/vue@3/dist/vue.esm-browser.js"></script>
   </head>
   <body>
     <div id="app"></div>
-    <script type="module" src="./src/js/main.js"></script>
+    <script type="module">
+      import { createApp, ref } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+
+      createApp({
+        setup() {
+          const collections = ref([]);
+          const newCollectionName = ref('');
+          const newCollectionImage = ref('');
+          const selectedCollection = ref(null);
+
+          const newItem = ref({ name: '', description: '', category: '', image: '' });
+
+          function addCollection() {
+            if (!newCollectionName.value.trim()) return;
+            collections.value.push({
+              name: newCollectionName.value,
+              image: newCollectionImage.value,
+              items: []
+            });
+            newCollectionName.value = '';
+            newCollectionImage.value = '';
+          }
+
+          function selectCollection(index) {
+            selectedCollection.value = collections.value[index];
+          }
+
+          function addItem() {
+            if (!selectedCollection.value || !newItem.value.name.trim()) return;
+            selectedCollection.value.items.push({ ...newItem.value });
+            newItem.value = { name: '', description: '', category: '', image: '' };
+          }
+
+          return {
+            collections,
+            newCollectionName,
+            newCollectionImage,
+            selectedCollection,
+            newItem,
+            addCollection,
+            selectCollection,
+            addItem
+          };
+        },
+        template: `
+          <header>Collectify - Organiza tus colecciones</header>
+          <main>
+            <div v-if="!selectedCollection">
+              <h2>Crea una nueva colección</h2>
+              <form @submit.prevent="addCollection">
+                <input v-model="newCollectionName" placeholder="Nombre de la colección" required />
+                <input v-model="newCollectionImage" placeholder="URL de imagen de la colección" />
+                <button type="submit">Crear colección</button>
+              </form>
+              <h2>Mis Colecciones</h2>
+              <div v-for="(col, index) in collections" :key="index" class="collection-card" @click="selectCollection(index)">
+                <strong>{{ col.name }}</strong> ({{ col.items.length }} ítems)
+                <img v-if="col.image" :src="col.image" alt="Imagen de colección" class="collection-image" />
+              </div>
+            </div>
+            <div v-else>
+              <button @click="selectedCollection = null">← Volver a colecciones</button>
+              <h2>{{ selectedCollection.name }}</h2>
+              <form @submit.prevent="addItem">
+                <input v-model="newItem.name" placeholder="Nombre del ítem" required />
+                <textarea v-model="newItem.description" placeholder="Descripción" rows="2"></textarea>
+                <select v-model="newItem.category">
+                  <option value="">Categoría</option>
+                  <option value="Libros">Libros</option>
+                  <option value="Monedas">Monedas</option>
+                  <option value="Figuras">Figuras</option>
+                  <option value="Otros">Otros</option>
+                </select>
+                <input v-model="newItem.image" placeholder="URL de imagen del ítem" />
+                <button type="submit">Agregar ítem</button>
+              </form>
+              <div v-if="selectedCollection.items.length">
+                <h3>Ítems</h3>
+                <div class="item" v-for="(item, i) in selectedCollection.items" :key="i">
+                  <strong>{{ item.name }}</strong>
+                  <p><em>{{ item.category }}</em></p>
+                  <p>{{ item.description }}</p>
+                  <img v-if="item.image" :src="item.image" alt="Imagen del ítem" class="item-image" />
+                </div>
+              </div>
+              <div v-else>
+                <p>Aún no hay ítems en esta colección.</p>
+              </div>
+            </div>
+          </main>
+        `
+      }).mount('#app');
+    </script>
   </body>
 </html>
