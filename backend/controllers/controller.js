@@ -50,7 +50,7 @@ exports.addItemToCollection = async (req, res) => {
   try {
     const collection = await Collection.findById(req.params.id);
     if (!collection) return res.status(404).json({ message: 'Collection not found' });
-
+    console.log(req.body); // Log the request body
     collection.items.push(req.body); // Add the new item to the items array
     await collection.save();
     res.status(201).json(collection);

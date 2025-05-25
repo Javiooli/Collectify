@@ -2,19 +2,19 @@ const mongoose = require('mongoose');
 
 // Define the schema for items
 const ItemSchema = new mongoose.Schema({
-  name: String,
-  description: String,
-  category: String,
+  name: { type: String, required: true },
+  description: { type: String },
+  category: { type: String },
+  image: { type: String }, // Ensure the image property is defined
 });
 
 // Define the schema for collections
 const CollectionSchema = new mongoose.Schema({
-  name: String,
-  items: [ItemSchema], // Array of items
+  name: { type: String, required: true },
+  image: { type: String },
+  items: [ItemSchema], // Embedded array of items
 });
 
-// Export both models
-const Item = mongoose.model('Item', ItemSchema);
 const Collection = mongoose.model('Collection', CollectionSchema);
 
-module.exports = { Item, Collection };
+module.exports = { Collection };
