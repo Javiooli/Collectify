@@ -49,9 +49,8 @@ frontend/
 │   ├── models/         # Models de dades
 │   │   ├── Collection.js
 │   │   └── Item.js
-│   ├── services/       # Serveis per a les API
-│   │   └── api.js
-│   └── views/          # Vistes (actualment buida)
+│   └── services/       # Serveis per a les API
+│       └── api.js
 ```
 
 ---
