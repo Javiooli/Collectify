@@ -59,8 +59,7 @@ frontend/
 │   │   └── style.css   # Estils globals
 │   └── img/            # Recursos d'imatges
 │       ├── Collectify_Logo_Simple.svg
-│       ├── Collectify_Logo.png
-│       └── vite.svg
+│       └── Collectify_Logo.png
 ├── src/
 │   ├── App.vue         # Component principal
 │   ├── main.js         # Punt d'entrada de Vue
