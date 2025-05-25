@@ -1,51 +1,6 @@
-const Item = require('../models/item');
+const { Collection } = require('../models/item'); // Import the Collection model
 
-// Crear un nou item
-exports.createItem = async (req, res) => {
-  try {
-    const newItem = new Item(req.body);
-    const savedItem = await newItem.save();
-    res.status(201).json(savedItem);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
-
-// Llistar tots els items
-exports.getItems = async (req, res) => {
-  try {
-    const items = await Item.find();
-    res.json(items);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Actualitzar un item
-exports.updateItem = async (req, res) => {
-  try {
-    const updatedItem = await Item.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    res.json(updatedItem);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
-
-// Esborrar un item
-exports.deleteItem = async (req, res) => {
-  try {
-    await Item.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Item esborrat correctament' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Crear una nova col·lecció
+// Create a new collection
 exports.createCollection = async (req, res) => {
   try {
     const newCollection = new Collection(req.body);
@@ -56,7 +11,7 @@ exports.createCollection = async (req, res) => {
   }
 };
 
-// Llistar totes les col·leccions
+// Get all collections
 exports.getCollections = async (req, res) => {
   try {
     const collections = await Collection.find();
@@ -66,7 +21,7 @@ exports.getCollections = async (req, res) => {
   }
 };
 
-// Actualitzar una col·lecció
+// Update a collection
 exports.updateCollection = async (req, res) => {
   try {
     const updatedCollection = await Collection.findByIdAndUpdate(
@@ -80,12 +35,64 @@ exports.updateCollection = async (req, res) => {
   }
 };
 
-// Esborrar una col·lecció
+// Delete a collection
 exports.deleteCollection = async (req, res) => {
   try {
     await Collection.findByIdAndDelete(req.params.id);
     res.json({ message: 'Col·lecció esborrada correctament' });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+// Add an item to a collection
+exports.addItemToCollection = async (req, res) => {
+  try {
+    const collection = await Collection.findById(req.params.id);
+    if (!collection) return res.status(404).json({ message: 'Collection not found' });
+
+    collection.items.push(req.body); // Add the new item to the items array
+    await collection.save();
+    res.status(201).json(collection);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Update an item in a collection
+exports.updateItemInCollection = async (req, res) => {
+  try {
+    const collection = await Collection.findById(req.params.collectionId);
+    if (!collection) return res.status(404).json({ message: 'Collection not found' });
+
+    const item = collection.items.id(req.params.itemId); // Find the item by its ID
+    if (!item) return res.status(404).json({ message: 'Item not found' });
+
+    Object.assign(item, req.body); // Update the item's fields
+    await collection.save();
+    res.json(collection);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Delete an item from a collection
+exports.deleteItemFromCollection = async (req, res) => {
+  try {
+    const collection = await Collection.findById(req.params.collectionId);
+    if (!collection) return res.status(404).json({ message: 'Collection not found' });
+
+    // Find the index of the item to remove
+    const itemIndex = collection.items.findIndex(item => item._id.toString() === req.params.itemId);
+    if (itemIndex === -1) return res.status(404).json({ message: 'Item not found' });
+
+    // Remove the item from the array
+    collection.items.splice(itemIndex, 1);
+
+    // Save the updated collection
+    await collection.save();
+    res.json(collection);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 };

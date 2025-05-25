@@ -27,14 +27,29 @@
   <script setup>
   import { ref } from 'vue';
   import Item from '../models/Item.js';
+  import { updateCollection } from '../services/api.js'; // Import the API service
   
   const props = defineProps(['collection']);
   const emit = defineEmits(['back']);
   
   const item = ref(new Item('', '', '', ''));
   
-  function addItem() {
-    props.collection.addItem(new Item(item.value.name, item.value.description, item.value.category, item.value.image));
-    item.value = new Item('', '', '', '');
+  async function addItem() {
+    try {
+      // Add the new item to the collection's items array
+      props.collection.items.push(new Item(item.value.name, item.value.description, item.value.category, item.value.image));
+  
+      // Save the updated collection to the backend
+      await updateCollection(props.collection._id, {
+        name: props.collection.name,
+        image: props.collection.image,
+        items: props.collection.items, // Ensure the items array is included
+      });
+  
+      // Reset the form
+      item.value = new Item('', '', '', '');
+    } catch (error) {
+      console.error('Error adding item:', error);
+    }
   }
   </script>
