@@ -4,16 +4,17 @@
     
     <h2>{{ collection.name }}</h2>
 
+    
+
     <!-- Create Item Form -->
     <form v-if="!editingItem" @submit.prevent="addItem">
       <input v-model="item.name" placeholder="Nombre del ítem" required />
       <textarea v-model="item.description" placeholder="Descripción"></textarea>
       <select v-model="item.category">
-        <option value="" disabled selected>Categoría</option> <!-- Disabled and selected by default -->
+        <option value="" disabled selected>Categoría</option>
         <option v-for="cat in uniqueCategories" :key="cat" :value="cat">{{ cat }}</option>
         <option value="Nueva categoría">Nueva categoría</option>
       </select>
-      <!-- Show input for new category if "Nueva categoría" is selected -->
       <input
         v-if="item.category === 'Nueva categoría'"
         v-model="item.newCategory"
@@ -28,11 +29,10 @@
       <input v-model="editingItem.name" placeholder="Nombre del ítem" required />
       <textarea v-model="editingItem.description" placeholder="Descripción"></textarea>
       <select v-model="editingItem.category">
-        <option value="" disabled selected>Categoría</option> <!-- Disabled and selected by default -->
+        <option value="" disabled selected>Categoría</option>
         <option v-for="cat in uniqueCategories" :key="cat" :value="cat">{{ cat }}</option>
         <option value="Nueva categoría">Nueva categoría</option>
       </select>
-      <!-- Show input for new category if "Nueva categoría" is selected -->
       <input
         v-if="editingItem.category === 'Nueva categoría'"
         v-model="editingItem.newCategory"
@@ -43,14 +43,38 @@
       <button type="button" @click="cancelEdit">Cancelar</button>
     </form>
 
-    <div v-for="(i, idx) in collection.items" :key="idx" class="item">
-      <strong>{{ i.name }}</strong>
-      <p><em>{{ i.category }}</em></p>
-      <p>{{ i.description }}</p>
-      <img v-if="i.image" :src="i.image" class="item-image" />
-      <div class="button-container">
-        <button @click="$emit('delete-item', i._id)" class="delete-button">Eliminar</button>
-        <button @click="startEdit(i)" class="edit-button">Editar</button>
+    <!-- Toggle View Button -->
+    <button @click="toggleViewMode" class="toggle-view-button">
+      <i :class="viewMode === 'list' ? 'fas fa-th' : 'fas fa-list'"></i>
+    </button>
+
+    <!-- Items Display -->
+    <div :class="['items-container', viewMode]">
+      <div
+        v-for="(i, idx) in collection.items"
+        :key="idx"
+        class="item"
+        @click="openModal(i)"
+      >
+        <strong>{{ i.name }}</strong>
+        <p><em>{{ i.category }}</em></p>
+        <p class="description">{{ i.description.slice(0, 100) }}{{ i.description.length > 100 ? '...' : '' }}</p>
+        <img v-if="i.image" :src="i.image" class="item-image" />
+        <div class="button-container">
+          <button @click.stop="$emit('delete-item', i._id)" class="delete-button">Eliminar</button>
+          <button @click.stop="startEdit(i)" class="edit-button">Editar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div v-if="selectedItem" class="modal-overlay" @click="closeModal">
+      <div class="modal-content" @click.stop>
+        <button class="close-button" @click="closeModal">×</button>
+        <h3>{{ selectedItem.name }}</h3>
+        <p><strong>Categoría:</strong> {{ selectedItem.category }}</p>
+        <p><strong>Descripción:</strong> {{ selectedItem.description }}</p>
+        <img v-if="selectedItem.image" :src="selectedItem.image" class="modal-image" />
       </div>
     </div>
   </div>
@@ -65,17 +89,17 @@ const props = defineProps(['collection']);
 const emit = defineEmits(['back', 'delete-item', 'update-item']);
 
 const item = ref(new Item('', '', '', ''));
-const editingItem = ref(null); // Track the item being edited
+const editingItem = ref(null);
+const viewMode = ref('list'); // Track the current view mode
+const selectedItem = ref(null); // Track the currently selected item for the modal
 
-// Compute unique categories from the collection's items
 const uniqueCategories = computed(() => {
   const categories = props.collection.items.map(i => i.category);
-  return [...new Set(categories.filter(cat => cat))]; // Remove duplicates and empty values
+  return [...new Set(categories.filter(cat => cat))];
 });
 
 async function addItem() {
   try {
-    // Use the new category if "Nueva categoría" is selected
     if (item.value.category === 'Nueva categoría') {
       item.value.category = item.value.newCategory;
     }
@@ -94,12 +118,11 @@ async function addItem() {
 }
 
 function startEdit(existingItem) {
-  editingItem.value = { ...existingItem }; // Copy the item's data into the editing form
+  editingItem.value = { ...existingItem };
 }
 
 async function updateItem() {
   try {
-    // Use the new category if "Nueva categoría" is selected
     if (editingItem.value.category === 'Nueva categoría') {
       editingItem.value.category = editingItem.value.newCategory;
     }
@@ -110,13 +133,25 @@ async function updateItem() {
       editingItem.value
     );
     props.collection.items = updatedCollection.items;
-    editingItem.value = null; // Clear the editing state
+    editingItem.value = null;
   } catch (error) {
     console.error('Error updating item:', error);
   }
 }
 
 function cancelEdit() {
-  editingItem.value = null; // Cancel editing
+  editingItem.value = null;
+}
+
+function toggleViewMode() {
+  viewMode.value = viewMode.value === 'list' ? 'grid' : 'list';
+}
+
+function openModal(item) {
+  selectedItem.value = item;
+}
+
+function closeModal() {
+  selectedItem.value = null;
 }
 </script>
