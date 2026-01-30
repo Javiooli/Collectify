@@ -112,7 +112,8 @@ button:hover {
   display: flex;
   flex-direction: column; /* Stack content vertically */
   align-items: center; /* Center-align the content */
-  justify-content: space-between; /* Ensure buttons stay at the bottom */
+  justify-content: flex-start; /* Stack from the top; we will push image/buttons as needed */
+  position: relative;
   height: 100%; /* Make the item div take full height */
 }
 
@@ -128,14 +129,15 @@ button:hover {
   object-fit: cover;
   border-radius: 0.75rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  margin-bottom: 1rem; /* Add spacing below the image */
+  margin-top: auto; /* Push the image down to the bottom of the flex column */
+  margin-bottom: 1rem; /* Spacing between image and buttons */
 }
 
 /* Button Container */
 .item .button-container {
   display: flex;
   gap: 1rem; /* Add spacing between buttons */
-  margin-top: auto; /* Push buttons to the bottom of the item div */
+  margin-top: 0; /* keep buttons after the image */
   justify-content: center; /* Center-align buttons horizontally */
 }
 

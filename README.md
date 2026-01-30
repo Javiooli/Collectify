@@ -86,7 +86,7 @@ cd collectify
    ```
 4. Iniciar el servidor:
    ```bash
-   npm start
+   node app.js
    ```
 
 #### 3. Configurar el frontend

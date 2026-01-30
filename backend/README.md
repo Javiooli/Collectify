@@ -97,7 +97,7 @@ backend/
 
 4. **Iniciar el servidor**:
     ```bash
-    npm start
+    node app.js
     ```
 
 5. **Verificar el funcionament**:
