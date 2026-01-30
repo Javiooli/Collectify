@@ -1,4 +1,4 @@
-const API_URL = 'http://213.97.62.3:3010/api';
+const API_URL = 'http://localhost:5000/api';
 
 // Fetch all collections
 export async function fetchCollections() {
